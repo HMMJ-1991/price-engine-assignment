@@ -9,27 +9,30 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import com.assessment.pricing.engine.engine.dto.ApiResponse;
+import com.assessment.pricing.engine.engine.dto.EngineResponse;
+
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
 	@ExceptionHandler(PricingEngineException.class)
-	public ResponseEntity<ApiResponse> handleDBProcedureException(PricingEngineException postSaleModificationException) {
+	public ResponseEntity<EngineResponse> handleDBProcedureException(PricingEngineException postSaleModificationException) {
 
 		String message = postSaleModificationException.getMessage();
 		Object data = postSaleModificationException.getData();
-		return new ApiResponse.ApiResponseBuilder().withHttpStatus(HttpStatus.BAD_REQUEST).withMessage(message).withData(data).build();
+//		return new EngineResponse.ApiResponseBuilder().withHttpStatus().withMessage(message).withData(data).build();
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new EngineResponse(HttpStatus.BAD_REQUEST.value(), message, data));
 	}
 
 	// error handle for @Valid
 	@ExceptionHandler(MethodArgumentNotValidException.class)
-	public ResponseEntity<ApiResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException methodArgumentNotValidException) {
+	public ResponseEntity<EngineResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException methodArgumentNotValidException) {
 
 		// Get all errors from field validation
 		List<String> errors = methodArgumentNotValidException.getBindingResult().getFieldErrors().stream().map(x -> x.getDefaultMessage()).collect(Collectors.toList());
 
-		return new ApiResponse.ApiResponseBuilder().withHttpStatus(HttpStatus.BAD_REQUEST).withMessage(errors.toString()).build();
+//		return new EngineResponse.ApiResponseBuilder().withHttpStatus(HttpStatus.BAD_REQUEST).withMessage(errors.toString()).build();
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new EngineResponse(HttpStatus.BAD_REQUEST.value(), errors.toString()));
 	}
 
 }
